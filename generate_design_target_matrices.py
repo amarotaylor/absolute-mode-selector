@@ -21,7 +21,7 @@ class feature_set_basic_regression:
     def validate_data_table(self):
         print 'Validating data table'
         remove_rows = np.ones([len(self.data_table),1],dtype=bool)
-        for index,row in self.data_table():
+        for index,row in self.data_table.iterrows():
             if not os.path.isfile(row['absolute_annotated_maf']) or not os.path.isfile(row['absolute_seg_file']):
                 remove_rows[index] = False
         print 'Removing ' + str(np.sum(~remove_rows)) + ' rows due to missing files'

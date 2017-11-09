@@ -33,7 +33,7 @@ class feature_set_basic_regression:
         print 'Generating basic copy number feature matrix on ' + str(len(self.data_table)) + ' samples'
         X_acna = np.zeros([len(self.data_table),2, nbin])
         for index, row in self.data_table.iterrows():
-            if np.mod(self.data_table,100) == 0:
+            if np.mod(index,100) == 0:
                 print str(index)+'/'+str(len(self.data_table))
             X_acna[index,:, :] = process_mut_acn.read_and_process_seg_file(row['absolute_seg_file'], nbin)
         return X_acna
@@ -43,7 +43,7 @@ class feature_set_basic_regression:
         print 'Generating basic mutation feature matrix on ' + str(len(self.data_table)) + ' samples'
 
         for index, row in self.data_table.iterrows():
-            if np.mod(self.data_table,100) == 0:
+            if np.mod(index,100) == 0:
                 print str(index)+'/'+str(len(self.data_table))
             X_mut[index, :] = process_mut_acn.read_and_process_maf_file(row['absolute_annotated_maf'])
         return X_mut

@@ -79,6 +79,8 @@ def read_and_process_seg_file(path,nbin):
     sample_seg.dropna(inplace=True)
     sample_seg.reset_index(inplace=True,drop=True)
 
+
+
     if not is_number(sample_seg['Chromosome'][0]):
             sample_seg['contig'] = chr2num(sample_seg['Chromosome'])
     else :
@@ -112,6 +114,8 @@ def read_and_process_maf_file(path):
     The presence of higher allele fraction events is consistent with greater purity."""
     fields = ['alt', 'ref']
     sample_maf = pd.read_csv(path, sep="\t", usecols=fields)
+    print 'Generating basic mutation data feature matrix on ' + str(len(sample_)) + ' samples'
+
     x = np.linspace(beta.ppf(0, 1, 1), beta.ppf(1, 1, 1), 100)
     X_mut = np.zeros([1,len(x)])
 

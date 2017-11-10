@@ -14,7 +14,7 @@ class feature_set_basic_regression:
         self.data_table.dropna(inplace=True)
         self.data_table.reset_index(inplace=True,drop=True)
         self.id = args.feature_set_id
-        self.target = np.zeros([len(self.data_table),2])
+
 
     def validate_data_table(self):
         print 'Validating data table'
@@ -26,6 +26,7 @@ class feature_set_basic_regression:
         self.data_table = self.data_table[remove_rows]
         self.data_table.reset_index(inplace=True,drop=True)
         self.X = np.zeros([len(self.data_table), 3, 200])
+        self.target = np.zeros([len(self.data_table), 2])
     def generate_acna_matrix(self):
         nbin = 200
         print 'Generating basic copy number feature matrix on ' + str(len(self.data_table)) + ' samples'

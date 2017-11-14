@@ -49,11 +49,10 @@ if __name__ == "__main__":
     # Assign user input arguments
     arguments = docopt.docopt(__doc__)
     in_path = arguments['-p'].strip()
+    pair_id = arguments['-n'].strip()
     out_path = arguments['-o'].strip()
 
     if not os.path.exists(out_path):
         os.makedirs(out_path)
 
-    for file_name in os.listdir(in_path):
-        if file_name.endswith('.RData'):
-            convertRtoPandas(in_path + "/" + file_name).to_csv(out_path + "/" + file_name.split('.')[0] + ".csv")
+    convertRtoPandas(in_path).to_csv(out_path + "/" + pair_id + "_absolute_solutions.csv")

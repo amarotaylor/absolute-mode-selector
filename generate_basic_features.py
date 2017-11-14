@@ -94,7 +94,7 @@ def read_and_process_seg_file(path,nbin):
     sample_seg.loc[sample_seg['hscr.a1']> int(np.true_divide(nbin,10)), 'hscr.a1'] = int(np.true_divide(nbin,10))
     sample_seg.loc[sample_seg['hscr.a2']> int(np.true_divide(nbin,10)), 'hscr.a2'] = int(np.true_divide(nbin,10))
 
-    X_acna = np.zeros([2,nbin])
+    X_acna = np.zeros([nbin])
     W = np.zeros([sample_seg.shape[0], 1])
 
     total_territory = 0
@@ -104,8 +104,8 @@ def read_and_process_seg_file(path,nbin):
     for index, row in sample_seg.iterrows():
         seg_length = float(sample_seg['End.bp'][index] - sample_seg['Start.bp'][index])
         W[index] = seg_length / total_territory
-        X_acna[0,int(np.round(sample_seg['hscr.a1'][index], 1) * 10)] += W[index]
-        X_acna[1,int(np.round(sample_seg['hscr.a2'][index], 1) * 10)] += W[index]
+        X_acna[int(np.round(sample_seg['hscr.a1'][index], 1) * 10)] += W[index]
+        X_acna[int(np.round(sample_seg['hscr.a2'][index], 1) * 10)] += W[index]
     return X_acna
 
 def read_and_process_maf_file(path):
@@ -116,7 +116,7 @@ def read_and_process_maf_file(path):
     sample_maf = pd.read_csv(path, sep="\t", usecols=fields)
 
     x = np.linspace(beta.ppf(0, 1, 1), beta.ppf(1, 1, 1), 100)
-    X_mut = np.zeros([1,len(x)])
+    X_mut = np.zeros([len(x)])
 
     for index, row in sample_maf.iterrows():
         X_mut += beta.pdf(x, row['alt'] + 1, row['ref'] + 1)

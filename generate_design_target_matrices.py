@@ -6,6 +6,7 @@ import numpy as np
 import generate_basic_features as process_mut_acn
 import R_to_PY_data_transformer as R
 import docopt
+import cPickle as pkl
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage
 
@@ -86,8 +87,6 @@ class solution_classification_features:
         self.X = np.zeros([len(self.data_table), 301])
         self.target = np.zeros([len(self.data_table), 2])
     def generate_solutions_tables(self):
-        ''' use .rdata file to generate many solutions per sample'''
-    def rdata_to_pandas(self):
         ''' code from Adam use rpy2 to execute rcode which reads out a solutions file to pandas '''
         col_names = ['alpha', 'tau', 'AT', 'b', 'delta', 'LL', 'mode_curv', 'genome mass', 'sigma.h.hat', 'theta.z.hat',
                      'sigma.A.hat',
@@ -135,6 +134,9 @@ class solution_classification_features:
             self.cna_mutation_array[row['pair_id']] = X_array
     def generate_X(self):
         self.generate_cna_mut_matrix()
+        self.generate_solutions_tables()
+        self.generate_target()
+        self.data_mat = [self.cna_mutation_array,self.pp_modes_tables,self.target_purity,self.target_ploidy]
 
     def generate_target(self):
         for index, row in self.data_table.iterrows():
@@ -164,8 +166,7 @@ def main():
         data.generate_X()
         data.generate_target()
 
-    np.savez(data.id + '_' + args.feature_type +'_' + str(datetime.datetime.now().time()), cna_dict = data.cna_mutation_array,
-             modes_data = data.pp_modes_tables, target_ploidy = data.target_ploidy, target_purity = data.target_purity)
+    pkl.dump(data.data_mat,open(data.id + '_' + args.feature_type +'_' + str(datetime.datetime.now().time())+'.pickle','wb'))
 
 if __name__ == "__main__":
     main()

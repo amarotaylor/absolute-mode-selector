@@ -4,8 +4,6 @@ import argparse
 import datetime
 import numpy as np
 import generate_basic_features as process_mut_acn
-import R_to_PY_data_transformer as R
-import docopt
 import cPickle as pkl
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import SignatureTranslatedAnonymousPackage

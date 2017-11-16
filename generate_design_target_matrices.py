@@ -138,8 +138,8 @@ class solution_classification_features:
 
     def generate_target(self):
         for index, row in self.data_table.iterrows():
-            self.target_purity[row['pair_id']] = self.data_table['purity']
-            self.target_ploidy[row['pair_id']] = self.data_table['ploidy']
+            self.target_purity[row['pair_id']] = self.data_table['purity'][index]
+            self.target_ploidy[row['pair_id']] = self.data_table['ploidy'][index]
 
 
 

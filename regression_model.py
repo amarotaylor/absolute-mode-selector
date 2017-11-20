@@ -50,25 +50,27 @@ else:
 
 
 # Initialize input layers
+activation = 'sigmoid'
+initialization = 'glorot_normal'
 mut_input = Input(shape=(301,))
 abs_input = Input(shape=(len(ABS_features), max_modes_num))
 
 # Build the purity network
-pur_dense1 = Dense(200, activation='softsign', kernel_initializer='glorot_normal')(mut_input)
-pur_dense2 = Dense(100, activation='softsign', kernel_initializer='glorot_normal')(pur_dense1)
-pur_dense3 = Dense(50, activation='softsign', kernel_initializer='glorot_normal')(pur_dense2)
-predictions = Dense(1, activation='softsign')(pur_dense3)
+pur_dense1 = Dense(200, activation=activation, kernel_initializer=initialization)(mut_input)
+pur_dense2 = Dense(100, activation=activation, kernel_initializer=initialization)(pur_dense1)
+pur_dense3 = Dense(50, activation=activation, kernel_initializer=initialization)(pur_dense2)
+predictions = Dense(1, activation=activation)(pur_dense3)
 
 #abs_conv = Conv1D(16, 7)(abs_input)
-abs_dense1 = Dense(100, activation='softsign', kernel_initializer='glorot_normal')(abs_input)
-abs_dense2 = Dense(50, activation='softsign', kernel_initializer='glorot_normal')(abs_dense1)
+abs_dense1 = Dense(100, activation=activation, kernel_initializer=initialization)(abs_input)
+abs_dense2 = Dense(50, activation=activation, kernel_initializer=initialization)(abs_dense1)
 abs_flat = Flatten()(abs_dense2)
 merged = concatenate([abs_flat, pur_dense3])
 
-predictions = Dense(1, activation='softsign')(merged)
+predictions = Dense(1, activation=activation)(merged)
 
 model = Model(inputs=[abs_input, mut_input], outputs=predictions)
 #model = Model(inputs=mut_input, outputs=predictions)
-model.compile(optimizer='adam', loss='mean_absolute_error')
-model.fit([abs_mat, mut_mat], purity_vec, epochs=7, batch_size=100, verbose=2)
+model.compile(optimizer='adamax', loss='mean_absolute_error')
+model.fit([abs_mat, mut_mat], purity_vec, epochs=20, batch_size=20, verbose=2)
 #model.fit(mut_mat, purity_vec, epochs=7, batch_size=100, verbose=2)

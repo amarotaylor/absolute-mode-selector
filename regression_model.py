@@ -1,6 +1,6 @@
 import pickle as pkl
 import numpy as np
-from keras.layers import Input, Dense
+from keras.layers import Input, Dense, concatenate, Conv1D, Flatten, Reshape
 from keras.models import Model
 
 reload_data = False
@@ -23,7 +23,7 @@ if reload_data:
             ploidy_dict.update(data_matrix[3]) # target ploidy value
 
     mut_mat = np.zeros([len(mut_mat_dict), 301])
-    abs_mat = np.zeros([len(modes_dict), max_modes_num, len(ABS_features)])
+    abs_mat = np.zeros([len(modes_dict), len(ABS_features), max_modes_num])
     purity_vec = np.zeros(len(purity_dict))
     ploidy_vec = np.zeros(len(ploidy_dict))
     for i, key in enumerate(mut_mat_dict.keys()):
@@ -33,9 +33,9 @@ if reload_data:
         ploidy_vec[i] = ploidy_dict[key]
         modes_shape = modes_dict[key].shape
         if modes_shape[0] > max_modes_num:
-            abs_mat[i, :, :] = modes_dict[key].loc[:max_modes_num - 1, ABS_features].values
+            abs_mat[i, :, :] = np.transpose(modes_dict[key].loc[:max_modes_num - 1, ABS_features].values)
         else:
-            abs_mat[i, :modes_shape[0], :] = modes_dict[key].loc[:, ABS_features].values
+            abs_mat[i, :, :modes_shape[0]] = np.transpose(modes_dict[key].loc[:, ABS_features].values)
 
     np.save('mutations matrix', mut_mat)
     np.save('ABSOLUTE matrix', abs_mat)
@@ -51,7 +51,7 @@ else:
 
 # Initialize input layers
 mut_input = Input(shape=(301,))
-abs_input = Input(shape=(max_modes_num, len(ABS_features)))
+abs_input = Input(shape=(len(ABS_features), max_modes_num))
 
 # Build the purity network
 pur_dense1 = Dense(200, activation='softsign', kernel_initializer='glorot_normal')(mut_input)
@@ -59,6 +59,16 @@ pur_dense2 = Dense(100, activation='softsign', kernel_initializer='glorot_normal
 pur_dense3 = Dense(50, activation='softsign', kernel_initializer='glorot_normal')(pur_dense2)
 predictions = Dense(1, activation='softsign')(pur_dense3)
 
-model = Model(inputs=mut_input, outputs=predictions)
+#abs_conv = Conv1D(16, 7)(abs_input)
+abs_dense1 = Dense(100, activation='softsign', kernel_initializer='glorot_normal')(abs_input)
+abs_dense2 = Dense(50, activation='softsign', kernel_initializer='glorot_normal')(abs_dense1)
+abs_flat = Flatten()(abs_dense2)
+merged = concatenate([abs_flat, pur_dense3])
+
+predictions = Dense(1, activation='softsign')(merged)
+
+model = Model(inputs=[abs_input, mut_input], outputs=predictions)
+#model = Model(inputs=mut_input, outputs=predictions)
 model.compile(optimizer='adam', loss='mean_absolute_error')
-model.fit(mut_mat, purity_vec, epochs=7, batch_size=100, verbose=2)
+model.fit([abs_mat, mut_mat], purity_vec, epochs=7, batch_size=100, verbose=2)
+#model.fit(mut_mat, purity_vec, epochs=7, batch_size=100, verbose=2)

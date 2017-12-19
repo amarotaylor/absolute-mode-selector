@@ -114,7 +114,7 @@ def create_baseline():
     return model
 
 X = train_set.mut_mat
-def create_larger():
+def wgd_model():
     # create model
     model = Sequential()
     model.add(Dense(256, input_dim=301, kernel_initializer='normal', activation='relu'))
@@ -128,7 +128,7 @@ def create_larger():
 
 estimators = []
 estimators.append(('standardize', StandardScaler()))
-estimators.append(('mlp', KerasClassifier(build_fn=create_larger, epochs=20, batch_size=50, verbose=1)))
+estimators.append(('mlp', KerasClassifier(build_fn=wgd_model, epochs=20, batch_size=50, verbose=1)))
 pipeline = Pipeline(estimators)
 kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=seed)
 results = cross_val_score(pipeline, X, encoded_Y, cv=kfold)

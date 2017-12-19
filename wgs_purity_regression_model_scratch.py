@@ -8,6 +8,15 @@ from keras.layers import Input, Dense, concatenate, Conv1D, Flatten, Reshape
 from keras.models import Model, Sequential
 import os
 
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.wrappers.scikit_learn import KerasClassifier
+from sklearn.model_selection import cross_val_score
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import StratifiedKFold
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+
 
 def createNumpyDataSet(data, keys, mode_num):
     np_data = Namespace()
@@ -114,6 +123,17 @@ def create_baseline():
     return model
 
 X = train_set.mut_mat
+
+# encode class values as integers
+encoder = LabelEncoder()
+
+encoder.fit(train_set.wgd_vec)
+# fix as a ploidy switch removing info about multiple wgds
+train_set.wgd[train_set.wgd_vec > 1] = 1
+encoded_Y = encoder.transform(train_set.wgd_vec)
+
+seed = 7
+np.random.seed(seed)
 def wgd_model():
     # create model
     model = Sequential()
@@ -128,13 +148,15 @@ def wgd_model():
 
 estimators = []
 estimators.append(('standardize', StandardScaler()))
-estimators.append(('mlp', KerasClassifier(build_fn=wgd_model, epochs=20, batch_size=50, verbose=1)))
+estimators.append(('mlp', KerasClassifier(build_fn=wgd_model, epochs=100, batch_size=100, verbose=1)))
 pipeline = Pipeline(estimators)
-kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=seed)
-results = cross_val_score(pipeline, X, encoded_Y, cv=kfold)
-print("Larger: %.2f%% (%.2f%%)" % (results.mean() * 100, results.std() * 100))
 pipeline.fit(X,encoded_Y)
 pipeline.predict(test_set.mut_mat)
+
+
+#kfold = StratifiedKFold(n_splits=10, shuffle=True, random_state=seed)
+#results = cross_val_score(pipeline, X, encoded_Y, cv=kfold)
+#print("wgd_model: %.2f%% (%.2f%%)" % (results.mean() * 100, results.std() * 100))
 
 # evaluate model with standardized dataset
 estimator = KerasClassifier(build_fn=create_baseline, nb_epoch=100, batch_size=5, verbose=0)

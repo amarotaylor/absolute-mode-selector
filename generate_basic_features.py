@@ -119,5 +119,5 @@ def read_and_process_maf_file(path):
     X_mut = np.zeros([len(x)])
 
     for index, row in sample_maf.iterrows():
-        X_mut += beta.pdf(x, row['alt'] + 1, row['ref'] + 1)
+        X_mut += beta.pdf(x, row['t_alt_count'] + 1, row['t_ref_count'] + 1)
     return X_mut

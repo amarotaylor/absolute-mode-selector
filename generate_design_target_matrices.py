@@ -197,10 +197,6 @@ class solution_prediction_features:
                 print str(index) + '/' + str(len(self.data_table))
             r_data = r_pack.load_RData(row['absolute_summary_data'])
             abs_table = pd.DataFrame(pandas2ri.ri2py(r_data), columns=col_names)
-            abs_table_solution_class = np.zeros([len(abs_table)])
-            abs_table_solution_class[np.argmin(np.abs(abs_table['alpha'] - row['purity']) + np.abs(
-                abs_table['tau'] - row['ploidy']))] = 1
-            abs_table['solution_class'] = abs_table_solution_class
             self.pp_modes_tables[row['pair_id']] = abs_table
         pandas2ri.deactivate()
 

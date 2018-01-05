@@ -112,12 +112,12 @@ def read_and_process_maf_file(path):
     """ Read in maf file and generate 100x1 mutation based features.
     Feature is just summed beta pdfs from all mutations observed in the sample.
     The presence of higher allele fraction events is consistent with greater purity."""
-    fields = ['alt', 'ref']
-    sample_maf = pd.read_csv(path, sep="\t", usecols=fields)
+
+    sample_maf = pd.read_csv(path, sep="\t")
 
     x = np.linspace(beta.ppf(0, 1, 1), beta.ppf(1, 1, 1), 100)
     X_mut = np.zeros([len(x)])
 
     for index, row in sample_maf.iterrows():
-        X_mut += beta.pdf(x, row['alt'] + 1, row['ref'] + 1)
+        X_mut += beta.pdf(x, row['t_alt_count'] + 1, row['t_ref_count'] + 1)
     return X_mut

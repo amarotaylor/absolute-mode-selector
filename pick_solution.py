@@ -60,6 +60,7 @@ def main():
     data_tsv['absolute_seg_file'] = args.seg_file
     data_tsv['absolute_annotated_maf'] = args.maf_file
     data_tsv['absolute_summary_data'] = args.r_data_file
+    data_tsv['pair_id'] = args.pair_id
     data_tsv = pd.DataFrame(data_tsv, index=[0])
     data_tsv.to_csv('tmp.input', sep='\t', index=False)
     args_input = Namespace()

@@ -78,7 +78,8 @@ def read_and_process_seg_file(path,nbin):
     sample_seg = pd.read_csv(path, sep='\t')
     sample_seg.dropna(inplace=True)
     sample_seg.reset_index(inplace=True,drop=True)
-
+    sample_seg['hscr.a1'] = sample_seg['f']*sample_seg['tau']
+    sample_seg['hscr.a2'] = 1-sample_seg['f']*sample_seg['tau']
 
 
     if not is_number(sample_seg['Chromosome'][0]):

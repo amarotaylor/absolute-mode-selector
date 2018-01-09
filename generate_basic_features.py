@@ -3,6 +3,7 @@ import sys
 import pandas as pd
 from scipy.stats import beta
 
+
 def is_number(s):
     try:
         float(s)
@@ -41,6 +42,7 @@ def hg19_to_linear_positions(chromosome, position, **keyword_parameters):
     x = np.array([chromosome[int(i)] for i in np.arange(0, len(position))])
     return C[[x.astype(int)]] + position
 
+
 def chr2num(chr):
     # convert chromosome from strings to ints
     chr[chr == 'X'] = '23'
@@ -61,39 +63,39 @@ def remove_small_centromere_segments(sample_seg):
                             1123541960, 1291657027, 1293557027, 1435895690, 1438395690, 1586459712, 1588159712]
 
     distance_centromere = np.zeros([len(sample_seg['genomic_coord_end']), len(centromere_positions)])
+    sample_seg['genomic_coord_mid'] = ((sample_seg['genomic_coord_end'] - sample_seg['genomic_coord_start']) / 2) + \
+                                      sample_seg['genomic_coord_start']
     for i, centromere in enumerate(centromere_positions):
-        distance_centromere[:, i] = np.abs(sample_seg['genomic_coord_start'] - centromere) + np.abs(
-            sample_seg['genomic_coord_end'] - centromere)
+        distance_centromere[:, i] = np.abs(sample_seg['genomic_coord_mid'] - centromere)
     distance_centromere = np.min(distance_centromere, axis=1)
-    sample_seg = sample_seg[distance_centromere > 50000]
+    sample_seg = sample_seg[np.logical_or(distance_centromere > 10000000, sample_seg.n_probes > 100)]
     sample_seg.dropna(inplace=True)
     sample_seg.reset_index(inplace=True, drop=True)
     return sample_seg
 
 
-def read_and_process_seg_file(path,nbin):
+def read_and_process_seg_file(path, nbin):
     """ Read in segment file and bin the allelic copy number data into nbin number of sections.
     we use 20 as the max value bin set to contain the data from an inital 7000 sample cohort.
     Values of hscr exceeding 20 are likely artifacts. """
     sample_seg = pd.read_csv(path, sep='\t')
     sample_seg.dropna(inplace=True)
-    sample_seg.reset_index(inplace=True,drop=True)
-    sample_seg['hscr.a1'] = sample_seg['f']*sample_seg['tau']
-    sample_seg['hscr.a2'] = 1-sample_seg['f']*sample_seg['tau']
-
+    sample_seg.reset_index(inplace=True, drop=True)
+    sample_seg['hscr.a1'] = sample_seg['f'] * sample_seg['tau']
+    sample_seg['hscr.a2'] = (1 - sample_seg['f']) * sample_seg['tau']
 
     if not is_number(sample_seg['Chromosome'][0]):
-            sample_seg['contig'] = chr2num(sample_seg['Chromosome'])
-    else :
-        sample_seg['contig'] = sample_seg['Chromosome']
+        sample_seg['contig'] = chr2num(sample_seg['Chromosome'])
+    else:
+        sample_seg['contig'] = sample_seg['Chromosome'] - 1
 
     sample_seg['genomic_coord_start'] = hg19_to_linear_positions(sample_seg['contig'], sample_seg['Start.bp'])
     sample_seg['genomic_coord_end'] = hg19_to_linear_positions(sample_seg['contig'], sample_seg['End.bp'])
 
     sample_seg = remove_small_centromere_segments(sample_seg)
     # see comment above
-    sample_seg.loc[sample_seg['hscr.a1']> int(np.true_divide(nbin,10)), 'hscr.a1'] = int(np.true_divide(nbin,10))
-    sample_seg.loc[sample_seg['hscr.a2']> int(np.true_divide(nbin,10)), 'hscr.a2'] = int(np.true_divide(nbin,10))
+    sample_seg.loc[sample_seg['hscr.a1'] > int(np.true_divide(nbin, 10)), 'hscr.a1'] = int(np.true_divide(nbin, 10))
+    sample_seg.loc[sample_seg['hscr.a2'] > int(np.true_divide(nbin, 10)), 'hscr.a2'] = int(np.true_divide(nbin, 10))
 
     X_acna = np.zeros([nbin])
     W = np.zeros([sample_seg.shape[0], 1])
@@ -108,6 +110,7 @@ def read_and_process_seg_file(path,nbin):
         X_acna[int(np.round(sample_seg['hscr.a1'][index], 1) * 10)] += W[index]
         X_acna[int(np.round(sample_seg['hscr.a2'][index], 1) * 10)] += W[index]
     return X_acna
+
 
 def read_and_process_maf_file(path):
     """ Read in maf file and generate 100x1 mutation based features.

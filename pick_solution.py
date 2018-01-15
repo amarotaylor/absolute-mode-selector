@@ -81,11 +81,11 @@ def main():
     solution_data_scale = solutions_scaler.transform(solution_data)
     solutions = solution_model.predict(solution_data_scale) > 0.5
     if np.sum(solutions) > 0:
-        true_val = np.argmax(solution_model.predict(solution_data_scale) > 0.5)
+        true_val = np.argmax(solution_model.predict(solution_data_scale) > 0.5)+1
         best_guess = true_val
     else:
         true_val = np.nan
-        best_guess = np.argmax(solution_model.predict(solution_data_scale))
+        best_guess = np.argmax(solution_model.predict(solution_data_scale))+1
     with open("NN_solution.txt", "w") as text_file:
         text_file.write(np.str(true_val))
         text_file.write('\n')

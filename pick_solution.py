@@ -79,16 +79,19 @@ def main():
     solutions_scaler = joblib.load('solutions_scaler.pkl')
     solution_data = createModeClassificationDataSet(data, predicted_purity, predicted_wgd, key)
     solution_data_scale = solutions_scaler.transform(solution_data)
-    solutions = solution_model.predict(solution_data_scale) > 0.1
+    solutions = solution_model.predict(solution_data_scale) > 0.5
     if np.sum(solutions) > 0:
-        true_val = np.argmax(solution_model.predict(solution_data_scale) > 0.05)
-    else :
+        true_val = np.argmax(solution_model.predict(solution_data_scale) > 0.5)
+        best_guess = true_val
+    else:
         true_val = np.nan
-
-    with open("Output.txt", "w") as text_file:
+        best_guess = np.argmax(solution_model.predict(solution_data_scale))
+    with open("NN_solution.txt", "w") as text_file:
         text_file.write(np.str(true_val))
         text_file.write('\n')
-
+    with open("best_guess.txt", "w") as text_file:
+        text_file.write(np.str(best_guess))
+        text_file.write('\n')
 
 
 if __name__ == "__main__":
